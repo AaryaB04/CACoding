@@ -1,6 +1,6 @@
 package use_case.clear_users;
 
-// TODO Complete me
-
+// No input data needed
 public class ClearInputData {
+    //public ClearInputData(){}
 }

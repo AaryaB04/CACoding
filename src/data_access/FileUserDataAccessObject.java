@@ -2,16 +2,15 @@ package data_access;
 
 import entity.User;
 import entity.UserFactory;
+import use_case.clear_users.ClearUserDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
 
 import java.io.*;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
-public class FileUserDataAccessObject implements SignupUserDataAccessInterface, LoginUserDataAccessInterface {
+public class FileUserDataAccessObject implements SignupUserDataAccessInterface, LoginUserDataAccessInterface, ClearUserDataAccessInterface {
 
     private final File csvFile;
 
@@ -19,7 +18,7 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface, 
 
     private final Map<String, User> accounts = new HashMap<>();
 
-    private UserFactory userFactory;
+    private final UserFactory userFactory;
 
     public FileUserDataAccessObject(String csvPath, UserFactory userFactory) throws IOException {
         this.userFactory = userFactory;
@@ -54,13 +53,13 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface, 
     }
 
     @Override
-    public void save(User user) {
+    public void save(User user) { // save into accounts
         accounts.put(user.getName(), user);
         this.save();
     }
 
     @Override
-    public User get(String username) {
+    public User get(String username) { // save into CSV
         return accounts.get(username);
     }
 
@@ -96,4 +95,29 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface, 
         return accounts.containsKey(identifier);
     }
 
+    @Override
+    public List<String> clear() {
+        List<String> usersList = new ArrayList<>();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(csvFile));
+            reader.readLine();
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                usersList.add((line.split(","))[0]);
+            }
+
+            BufferedWriter writer = new BufferedWriter(new FileWriter(csvFile));
+
+            writer.write("");
+
+            reader.close();
+            writer.close();
+
+            System.out.println("Users cleared from CSV");
+        } catch (IOException e) {
+            System.out.println("Error in clearing Users from CSV");
+        }
+        return usersList;
+    }
 }
